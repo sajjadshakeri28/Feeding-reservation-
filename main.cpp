@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #include <iostream>
 #include <string>
 #include <vector>
@@ -277,3 +275,15 @@ class Reservation {
     int Reservation::last_reservation_id = 0;
     
     
+// testing main for showing classes working;
+int main() {
+    Student student;
+    student.set_name("Ali");
+    student.set_balance(100.0);
+
+    Meal meal("kebab", "2025_04_25" , MealType::LUNCH , 10 , 50);
+    DiningHall hall("pardis" , "brijand univercity" , 200);
+
+    student.reserve_meal(meal , hall);
+    student.print();
+}
