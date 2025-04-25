@@ -5,6 +5,7 @@ using namespace std;
 
 // وضعیت رزرو
 enum ReservationStatus { SUCCESS, FAILED, CANCELLED };
+enum MealType { BREAKFAST , LUNCH , DINNER};
 
 class Meal {
     private:
@@ -73,4 +74,41 @@ class Meal {
             }
             cout << "\nPrice: " << price << "\nCapacity: " << capacity << endl;
         }
+    };
+
+    class Student;
+
+class Reservation {
+    private:
+        static int last_reservation_id;
+        int reservation_id;
+        Student* student;
+        Meal meal;
+        DiningHall dining_hall;
+        ReservationStatus status;
+        time_t created_at;
+
+    public:
+        Reservation(Student* s, Meal m, DiningHall d, ReservationStatus stat)
+        : student(s), meal(m), dining_hall(d), status(stat){
+            reservation_id = ++last_reservation_id;
+            created_at =  time(nullptr);
+        }
+
+
+        void set_status(ReservationStatus new_status){
+        status = new_status; }
+
+        int get_reservation_id() const{
+            return reservation_id;
+        }
+
+        ReservationStatus get_status() const{
+        return status; }
+
+        Meal get_meal() const{
+            return meal;
+        }
+
+        void print() const;//out of the class
     };
