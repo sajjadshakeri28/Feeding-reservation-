@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-// وضعیت رزرو
+
 enum ReservationStatus { SUCCESS, FAILED, CANCELLED };
 enum MealType { BREAKFAST , LUNCH , DINNER};
 
