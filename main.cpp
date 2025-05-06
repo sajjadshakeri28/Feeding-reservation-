@@ -286,4 +286,5 @@ int main() {
 
     student.reserve_meal(meal , hall);
     student.print();
+    cout <<"starting phase2" << endl;
 }
