@@ -427,3 +427,31 @@ int Reservation::last_reservation_id = 0;
 
 
     };
+ void Reservation::print() const {
+        cout << "Reservation ID: " << reservation_id << "\nStudent: " << student->get_name()
+        << "\nMeal: " << meal->get_name() << "Dining Hall: " << dining_hall->get_name() << endl;
+        cout << "status:";
+        switch (status){
+        case PENDING:
+            cout << "pending";
+            break;
+        case CANCELLED:
+            cout << "cancelled";
+            break;
+            case CONFIRMED:
+            cout << "confirmed";
+            break;
+    }
+    cout << endl;
+    }
+
+int main(){
+    Panel panel;
+    int choice;
+
+    while(true){
+        panel.show_menu();
+        cin >> choice;
+        panel.action(choice); 
+    }
+}    
