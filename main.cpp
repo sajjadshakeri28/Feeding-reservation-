@@ -196,7 +196,7 @@ class Meal {
             return name; }
 
         MealType get_type() const{
-            return meal_type; }   
+            return meal_type; }
 
         float get_price() const{
             return price;
@@ -240,6 +240,15 @@ class Meal {
                 name(name) , address(adress) , capacity(capacity){
                     hall_id = ++last_hall_id;
                 }
+            void set_nema(string n){
+                name = n;
+            }
+            void set_address(string a){
+                address = a;
+            }
+            void set_capacity(int c){
+                capacity = c;
+            }
 
             int get_hall_id() const{
                 return hall_id;
@@ -260,7 +269,7 @@ class Meal {
                 cout << "Hall ID: " << hall_id << "\nName: " << name << "\naddress: " << address << "\ncapacity: " << capacity << endl;
             }
         };
-
+int DiningHall::last_hall_id = 0;
 class Student;
 
 class Reservation {
