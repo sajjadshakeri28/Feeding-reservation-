@@ -104,7 +104,7 @@ class User{
         void set_password(string pass){
             hashband_password = pass;
         }
-    
+
         int get_user_id()const{
             return user_id;
         }
@@ -117,7 +117,7 @@ class User{
         string get_password()const{
             return hashband_password;
         }
-        
+
         virtual void print()const{
             cout << "User_ID: " << user_id << "\nName: "<< name << " " << last_name << endl;
         }
@@ -127,6 +127,21 @@ class User{
 };
 
 int User::last_user_id = 0;
+
+class Admin : public User {
+    public:
+        Admin(string name , string last_name , string password)
+            : User(name , last_name , password) {}
+
+        void print() const override {
+            cout << "Admin Account\n";
+            User::print();
+        }
+        string get_type()const override{
+            return "Admin";
+        }
+};
+
 class Meal {
     private:
         static int last_meal_id;
