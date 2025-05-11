@@ -270,6 +270,7 @@ class Meal {
             }
         };
 int DiningHall::last_hall_id = 0;
+
 class Student;
 
 class Reservation {
@@ -277,21 +278,31 @@ class Reservation {
         static int last_reservation_id;
         int reservation_id;
         Student* student;
-        Meal meal;
-        DiningHall dining_hall;
+        const DiningHall *dining_hall;
+        Meal* meal;
         ReservationStatus status;
         time_t created_at;
 
     public:
-        Reservation(Student* s, Meal m, DiningHall d, ReservationStatus stat)
-        : student(s), meal(m), dining_hall(d), status(stat){
+        Reservation(Student* s, Meal* m,const DiningHall* d)
+        : student(s), meal(m), dining_hall(d), status(PENDING){
             reservation_id = ++last_reservation_id;
             created_at =  time(nullptr);
         }
 
 
         void set_status(ReservationStatus new_status){
-        status = new_status; }
+        status = new_status;
+        }
+        void set_meal(Meal* m){
+            meal = m;
+        }
+        void set_dining_hall(const DiningHall* h){
+            dining_hall = h;
+        }
+        void set_created_at(time_t t){
+            created_at = t;
+        }
 
         int get_reservation_id() const{
             return reservation_id;
@@ -300,12 +311,20 @@ class Reservation {
         ReservationStatus get_status() const{
         return status; }
 
-        Meal get_meal() const{
+        Meal* get_meal() const{
             return meal;
         }
-
-        void print() const;//out of the class
+        const DiningHall* get_dininghall()const{
+            return dining_hall;
+        }
+        Student* get_student()const{
+            return student;
+        }
+        void print()const;
     };
+    
+    
+int Reservation::last_reservation_id = 0;
     class Student{
         private:
             static int last_user_id;
