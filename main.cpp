@@ -3,9 +3,63 @@
 #include <vector>
 using namespace std;
 
-// وضعیت رزرو
+
 enum ReservationStatus { SUCCESS, FAILED, CANCELLED };
 enum MealType { BREAKFAST , LUNCH , DINNER};
+
+class Student;
+class Reservation;
+
+class Panel {
+    public:
+    void show_menu(){
+        cout << "--- Student Panel Menu --- \n";
+        cout << "1. Show Student Info\n";
+        cout << "2. check Balance\n";
+        cout << "3. View Reservations\n";
+        cout << "4. Exit\n";
+        "-------------------------------------\n";
+        cout << "Enter your choice: ";
+
+    }
+    void exit(){
+        cout << "Exiting panel..." << endl;
+        std::exit(0);
+    }
+    void action(int choice) {
+        switch(choice){
+            case 1:
+                cout << "//void show_student_info()"<< endl; 
+                break;
+            case 2:
+                cout <<"//void check_balance()" << endl;
+                break;
+            case 3:
+                cout <<"//void view_resevations()"<< endl;
+                break;
+            case 4:
+                exit();
+                break; 
+            default:
+                cout << "Invalid choice.Please try again" << endl; 
+
+        }
+
+    }
+    
+    
+
+    //void show_student_info();
+    //void check_balance();
+    //void view_resevations();
+    //void add_reservation(Reservaion);
+    //void add_to_shop_cart();
+    //void confirm_shoppig_cart();
+    //vlid remove_shoppig_cart();
+    //void increace_balance();
+    //void view_recent_transactions();
+    //void cancle_reservation(int);
+};
 
 class Meal {
     private:
@@ -286,5 +340,5 @@ int main() {
 
     student.reserve_meal(meal , hall);
     student.print();
-    cout <<"starting phase2" << endl;
+    
 }
