@@ -29,7 +29,7 @@ class Panel {
     void action(int choice) {
         switch(choice){
             case 1:
-                cout << "//void show_student_info()"<< endl; 
+                cout << "//void show_student_info()"<< endl;
                 break;
             case 2:
                 cout <<"//void check_balance()" << endl;
@@ -39,15 +39,15 @@ class Panel {
                 break;
             case 4:
                 exit();
-                break; 
+                break;
             default:
-                cout << "Invalid choice.Please try again" << endl; 
+                cout << "Invalid choice.Please try again" << endl;
 
         }
 
     }
-    
-    
+
+
 
     //void show_student_info();
     //void check_balance();
@@ -60,6 +60,30 @@ class Panel {
     //void view_recent_transactions();
     //void cancle_reservation(int);
 };
+class Storage{
+    private:
+        int meal_ID_counter;
+        int diningHall_ID_counter;
+        static unique_ptr<Storage> _instance;
+        Storage() = default;
+        Storage(const Storage&) = delete;
+        Storage& operator=(const Storage&) = delete;
+    public:
+        vector<shared_ptr<Student>> students;
+        vector<shared_ptr<class Meal>> all_meals;
+        vector<shared_ptr<class DiningHall>> all_dining_halls;
+
+        static Storage& instance() {
+            if(!_instance)
+                _instance = unique_ptr<Storage>(new Storage());
+            return *_instance;
+        }
+
+};
+unique_ptr<Storage> Storage::_instance =nullptr;
+
+
+
 
 class Meal {
     private:
@@ -136,25 +160,25 @@ class Meal {
             string name;
             string address;
             int capacity;
-        
+
         public:
             DiningHall(string name , string adress , int capacity):
                 name(name) , address(adress) , capacity(capacity){
                     hall_id = ++last_hall_id;
                 }
-            
+
             int get_hall_id() const{
                 return hall_id;
             }
-        
+
             string get_name() const{
                 return name;
             }
-        
+
             string get_adderss() const{
                 return address;
             }
-            
+
             int get_capacity() const{
                 return capacity;
             }
@@ -213,8 +237,8 @@ class Reservation {
             Student(): balance(0.0) , is_active(true){
                 user_id = ++last_user_id;
             }
-    
-    
+
+
     //Setters
             void set_student_id(const string& sid){
                 student_id = sid;
@@ -261,13 +285,13 @@ class Reservation {
                 cout << "Balance: " << balance << endl;
                 cout << "is_active: " << is_active << endl;
             }
-    
+
             void reserve_meal(Meal& meal, const DiningHall& hall) {
                 if (!is_active) {
                     cout << "Account inactive. Cannot reserve meal." << endl;
                     return;
                 }
-            
+
                 if (balance < meal.get_price()) {
                     cout << "Insufficient balance!" << endl;
                     return;
@@ -280,29 +304,29 @@ class Reservation {
                 if(r.get_meal().get_date() == meal.get_date() && r.get_meal().get_type() && r.get_status() == ReservationStatus::SUCCESS){
                     cout << "Already reserved for this meal type and date." << endl;
                 }
-            }    
-            
+            }
+
                 meal.reserve_one();
                 balance -= meal.get_price();
                 reservations.emplace_back(this, meal, hall, SUCCESS);
                 cout << "Meal reserved successfully!" << endl;
             }
-            
+
             bool cancel_reservation(int reservation_id) {
                 for (auto& res : reservations) {
                     if (res.get_reservation_id() == reservation_id && res.get_status() == ReservationStatus::SUCCESS) {
                         res.set_status(ReservationStatus::CANCELLED);
-                        balance += res.get_meal().get_price(); 
+                        balance += res.get_meal().get_price();
                         return true;
                     }
                 }
                 cout << "NO active reservtion found for this id." << endl;
                 return false;
             }
-    
+
     };
-    
-    
+
+
     // print reservaton out of the class for using studnt name;
     void Reservation::print() const {
         cout << "Reservation ID: " << reservation_id << "\nStudent: " << student->get_name()
@@ -321,14 +345,14 @@ class Reservation {
     }
     cout << endl;
     }
-    
+
     //Assigning identifiers
     int Student::last_user_id = 0;
     int Meal::last_meal_id = 0;
     int DiningHall::last_hall_id = 0;
     int Reservation::last_reservation_id = 0;
-    
-    
+
+
 // testing main for showing classes working;
 int main() {
     Student student;
@@ -340,5 +364,5 @@ int main() {
 
     student.reserve_meal(meal , hall);
     student.print();
-    
+
 }
