@@ -82,9 +82,51 @@ class Storage{
 };
 unique_ptr<Storage> Storage::_instance =nullptr;
 
+class User{
+    protected:
+        static int last_user_id;
+        int user_id;
+        string name;
+        string last_name;
+        string hashband_password;
 
+    public:
+        User(string name, string last_name , string password)
+            : name(name) , last_name(last_name), hashband_password(password){
+                user_id = ++last_user_id;
+            }
+        void set_name(string n){
+            name = n;
+        }
+        void set_lastName(string ln){
+            last_name = ln;
+        }
+        void set_password(string pass){
+            hashband_password = pass;
+        }
+    
+        int get_user_id()const{
+            return user_id;
+        }
+        string get_name()const{
+            return name;
+        }
+        string get_last_name()const{
+            return last_name;
+        }
+        string get_password()const{
+            return hashband_password;
+        }
+        
+        virtual void print()const{
+            cout << "User_ID: " << user_id << "\nName: "<< name << " " << last_name << endl;
+        }
+        virtual string get_type()const{
+            return "User";
+        }
+};
 
-
+int User::last_user_id = 0;
 class Meal {
     private:
         static int last_meal_id;
