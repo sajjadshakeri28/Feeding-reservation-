@@ -147,30 +147,44 @@ class Meal {
         static int last_meal_id;
         int meal_id;
         string name;
-        string date;
-        MealType type;
-        int capacity;
         float price;
+        bool is_active;
+        MealType meal_type;
+        ReserveDay reserve_day;
         vector<string> side_items;
     public:
-    Meal(string name, string date, MealType type, int capacity, float price) :
-     name(name), date(date), type(type), capacity(capacity), price(price) {
+    Meal(string name,float price, MealType type, ReserveDay day ) :
+     name(name), price(price), meal_type(type) , reserve_day(day) , is_active(true) {
         meal_id = ++last_meal_id;
      }
-
-        bool is_available() const{
-        return capacity > 0; }
-
-        void reserve_one(){
-            capacity --; }
-
-        void cancel_reservation(){
-            capacity ++; }
-
-        void update_price(float new_price){
-            price = new_price;
+        void set_meal_type(MealType type){
+            meal_type = type;
+        }
+        void set_name(string n){
+            name = n;
+        }
+        void set_price(float p){
+            price = p;
+        }
+        void set_reserve_day(ReserveDay reserve){
+            reserve_day = reserve;
         }
 
+        bool get_is_active(){
+            return is_active;
+        }
+        void active(){
+            is_active = true;
+        }
+        void deactive(){
+            is_active = false;
+        }
+        bool is_available() const{
+            return is_active;
+        }
+        void add_price(float new_price){
+            price = new_price;
+        }
         void add_side_item(const string& item){
             side_items.push_back(item);
         }
@@ -178,38 +192,41 @@ class Meal {
         int get_meal_id() const{
             return meal_id;
         }
-
         string get_name() const{
             return name; }
 
-        string get_date() const{
-            return date; }
-
         MealType get_type() const{
-            return type; }
+            return meal_type; }   
 
         float get_price() const{
             return price;
+        }
+        ReserveDay getReservday()const{
+            return reserve_day;
         }
 
         const vector<string>& get_side_item() const {
             return side_items;
         }
         void print() const {
-            cout << "Meal ID: " << meal_id << "\nName: " << name << "/nDate: " << date << "\nType: ";
-            if(type == BREAKFAST)
-            {
-                cout << "BreakFast";
-            }
-            else if(type == LUNCH){
-                cout << "Lunch";
-            }
-            else{
-                cout << "Dinner";
-            }
-            cout << "\nPrice: " << price << "\nCapacity: " << capacity << endl;
+          cout << "Meal ID: " << meal_id << "\nName: " << name << "\nPrice: " << price << "\nStatus: " << (is_active ? "active": "deactive") << endl;
+          cout << "Meal Type: ";
+          if(meal_type == BREAKFAST)
+          {
+              cout << "BreakFast";
+          }
+          else if(meal_type == LUNCH){
+              cout << "Lunch";
+          }
+          else{
+              cout << "Dinner";
+          }
+        cout << "Reserve Day: " << reserve_day << endl;
         }
     };
+    int Meal::last_meal_id = 0;
+
+
     class DiningHall {
         private:
             static int last_hall_id;
