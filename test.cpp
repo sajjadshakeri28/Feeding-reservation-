@@ -2,11 +2,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+
 using namespace std;
 
-
-enum ReservationStatus { SUCCESS, FAILED, CANCELLED };
 enum MealType { BREAKFAST , LUNCH , DINNER};
+enum RStatus { SUCCESS, FAILED, CANCELLED };
+enum 
+
 
 class Student;
 class Reservation;
