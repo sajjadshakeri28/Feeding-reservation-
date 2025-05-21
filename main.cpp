@@ -2,14 +2,80 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <ctime>
+#include <algorithm>
+
 using namespace std;
 
+enum class MealType { BREAKFAST, LUNCH, DINNER };
+enum class RStatus { SUCCESS, CANCELLED, FAILED, NOT_PAID };
+enum class TransactionType { TRANSFER, PAYMENT };
+enum class TransactionStatus { PENDING, COMPLETED, FAILED };
+enum class SessionStatus { AUTHENTICATED, ANONYMOUS };
 
-enum ReservationStatus { SUCCESS, FAILED, CANCELLED };
-enum MealType { BREAKFAST , LUNCH , DINNER};
-
+class User;
 class Student;
+class Admin;
+class Meal;
+class DiningHall;
 class Reservation;
+class ShoppingCart;
+class Transaction;
+
+
+class User {
+protected:
+    static int last_user_id;
+    int user_id;
+    string name;
+    string last_name;
+    string hashed_password;
+
+public:
+    User(const string& name, const string& last_name, const string& password)
+        : name(name), last_name(last_name), hashed_password(password) {
+        user_id = ++last_user_id;
+    }
+
+    void set_name(const string& n) {
+        name = n;
+    }
+
+    void set_last_name(const string& ln) {
+        last_name = ln;
+    }
+
+    void set_password(const string& pass) {
+        hashed_password = pass;
+    }
+
+    int get_user_id() const {
+        return user_id;
+    }
+
+    string get_name() const {
+        return name;
+    }
+
+    string get_last_name() const {
+        return last_name;
+    }
+
+    string get_password() const {
+        return hashed_password;
+    }
+
+    virtual void print() const {
+        cout << "User  ID: " << user_id << "\nName: " << name << " " << last_name << endl;
+    }
+
+    virtual string get_type() const {
+        return "User ";
+    }
+};
+
+int User::last_user_id = 0;
+
 
 class Panel {
     public:
@@ -83,51 +149,7 @@ class Storage{
 };
 unique_ptr<Storage> Storage::_instance =nullptr;
 
-class User{
-    protected:
-        static int last_user_id;
-        int user_id;
-        string name;
-        string last_name;
-        string hashband_password;
 
-    public:
-        User(string name, string last_name , string password)
-            : name(name) , last_name(last_name), hashband_password(password){
-                user_id = ++last_user_id;
-            }
-        void set_name(string n){
-            name = n;
-        }
-        void set_lastName(string ln){
-            last_name = ln;
-        }
-        void set_password(string pass){
-            hashband_password = pass;
-        }
-
-        int get_user_id()const{
-            return user_id;
-        }
-        string get_name()const{
-            return name;
-        }
-        string get_last_name()const{
-            return last_name;
-        }
-        string get_password()const{
-            return hashband_password;
-        }
-
-        virtual void print()const{
-            cout << "User_ID: " << user_id << "\nName: "<< name << " " << last_name << endl;
-        }
-        virtual string get_type()const{
-            return "User";
-        }
-};
-
-int User::last_user_id = 0;
 
 class Admin : public User {
     public:
@@ -151,11 +173,11 @@ class Meal {
         float price;
         bool is_active;
         MealType meal_type;
-        ReserveDay reserve_day;
+        
         vector<string> side_items;
     public:
-    Meal(string name,float price, MealType type, ReserveDay day ) :
-     name(name), price(price), meal_type(type) , reserve_day(day) , is_active(true) {
+    Meal(string name,float price, MealType type) :
+     name(name), price(price), meal_type(type), is_active(true) {
         meal_id = ++last_meal_id;
      }
         void set_meal_type(MealType type){
@@ -167,10 +189,6 @@ class Meal {
         void set_price(float p){
             price = p;
         }
-        void set_reserve_day(ReserveDay reserve){
-            reserve_day = reserve;
-        }
-
         bool get_is_active(){
             return is_active;
         }
@@ -202,9 +220,6 @@ class Meal {
         float get_price() const{
             return price;
         }
-        ReserveDay getReservday()const{
-            return reserve_day;
-        }
 
         const vector<string>& get_side_item() const {
             return side_items;
@@ -212,17 +227,17 @@ class Meal {
         void print() const {
           cout << "Meal ID: " << meal_id << "\nName: " << name << "\nPrice: " << price << "\nStatus: " << (is_active ? "active": "deactive") << endl;
           cout << "Meal Type: ";
-          if(meal_type == BREAKFAST)
+          if(meal_type == MealType::BREAKFAST)
           {
               cout << "BreakFast";
           }
-          else if(meal_type == LUNCH){
+          else if(meal_type == MealType::LUNCH){
               cout << "Lunch";
           }
           else{
               cout << "Dinner";
           }
-        cout << "Reserve Day: " << reserve_day << endl;
+        
         }
     };
     int Meal::last_meal_id = 0;
@@ -281,18 +296,18 @@ class Reservation {
         Student* student;
         const DiningHall *dining_hall;
         Meal* meal;
-        ReservationStatus status;
+        RStatus status;
         time_t created_at;
 
     public:
         Reservation(Student* s, Meal* m,const DiningHall* d)
-        : student(s), meal(m), dining_hall(d), status(PENDING){
+        : student(s), meal(m), dining_hall(d), status(RStatus::NOT_PAID){
             reservation_id = ++last_reservation_id;
             created_at =  time(nullptr);
         }
 
 
-        void set_status(ReservationStatus new_status){
+        void set_status(RStatus new_status){
         status = new_status;
         }
         void set_meal(Meal* m){
@@ -309,7 +324,7 @@ class Reservation {
             return reservation_id;
         }
 
-        ReservationStatus get_status() const{
+        RStatus get_status() const{
         return status; }
 
         Meal* get_meal() const{
@@ -394,12 +409,12 @@ int Reservation::last_reservation_id = 0;
                     cout << "Meal is not available!" << endl;
                     return;
                 }
-            for(const auto& res : reservations){
-                if(res.get_meal()->get_type() == meal.get_type() && res.get_meal()->getReservday() == meal.getReservday() && res.get_status() == ReservationStatus::CONFIRMED){
-                    cout << "Already reserved for this meal type and date." << endl;
-                    return;
-                }
-            }
+            // for(const auto& res : reservations){
+            //     if(res.get_meal()->get_type() == meal.get_type() && res.get_meal()->getReservday() == meal.getReservday() && res.get_status() == ReservationStatus::CONFIRMED){
+            //         cout << "Already reserved for this meal type and date." << endl;
+            //         return;
+            //     }
+            // }
 
 
                 balance -= meal.get_price();
@@ -407,17 +422,17 @@ int Reservation::last_reservation_id = 0;
                 cout << "Meal reserved successfully!" << endl;
             }
 
-            bool cancel_reservation(int reservation_id) {
-                for (auto& res : reservations) {
-                    if (res.get_reservation_id() == reservation_id && res.get_status() == ReservationStatus::CONFIRMED) {
-                        res.set_status(ReservationStatus::CANCELLED);
-                        balance += res.get_meal()->get_price();
-                        return true;
-                    }
-                }
-                cout << "NO active reservtion found for this id." << endl;
-                return false;
-            }
+            // bool cancel_reservation(int reservation_id) {
+            //     for (auto& res : reservations) {
+            //         if (res.get_reservation_id() == reservation_id && res.get_status() == ReservationStatus::CONFIRMED) {
+            //             res.set_status(ReservationStatus::CANCELLED);
+            //             balance += res.get_meal()->get_price();
+            //             return true;
+            //         }
+            //     }
+            //     cout << "NO active reservtion found for this id." << endl;
+            //     return false;
+            // }
             void print()const override{
                 cout << "Student ID: " << student_id << endl;
                 cout << "Email: " << email << endl;
@@ -433,13 +448,13 @@ int Reservation::last_reservation_id = 0;
         << "\nMeal: " << meal->get_name() << "Dining Hall: " << dining_hall->get_name() << endl;
         cout << "status:";
         switch (status){
-        case PENDING:
+        case RStatus::FAILED:
             cout << "pending";
             break;
-        case CANCELLED:
+        case RStatus::CANCELLED:
             cout << "cancelled";
             break;
-            case CONFIRMED:
+            case RStatus::SUCCESS:
             cout << "confirmed";
             break;
     }
