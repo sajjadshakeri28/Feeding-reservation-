@@ -76,6 +76,148 @@ public:
 
 int User::last_user_id = 0;
 
+class Meal {
+private:
+    static int last_meal_id;
+    int meal_id;
+    string name;
+    float price;
+    bool is_active;
+    MealType meal_type;
+    vector<string> side_items;
+
+public:
+    Meal(const string& name, float price, MealType type)
+        : name(name), price(price), meal_type(type), is_active(true) {
+        meal_id = ++last_meal_id;
+    }
+
+    void set_meal_type(MealType type) {
+        meal_type = type;
+    }
+
+    void set_name(const string& n) {
+        name = n;
+    }
+
+    void set_price(float p) {
+        price = p;
+    }
+
+    bool get_is_active() const {
+        return is_active;
+    }
+
+    void activate() {
+        is_active = true;
+    }
+
+    void deactivate() {
+        is_active = false;
+    }
+
+    bool is_available() const {
+        return is_active;
+    }
+
+    void add_price(float new_price) {
+        price = new_price;
+    }
+
+    void add_side_item(const string& item) {
+        side_items.push_back(item);
+    }
+
+    int get_meal_id() const {
+        return meal_id;
+    }
+
+    string get_name() const {
+        return name;
+    }
+
+    MealType get_type() const {
+        return meal_type;
+    }
+
+    float get_price() const {
+        return price;
+    }
+
+    const vector<string>& get_side_items() const {
+        return side_items;
+    }
+
+    void print() const {
+        cout << "Meal ID: " << meal_id << "\nName: " << name << "\nPrice: " << price
+             << "\nStatus: " << (is_active ? "Active" : "Inactive") << endl;
+        cout << "Meal Type: ";
+        switch (meal_type) {
+            case MealType::BREAKFAST:
+                cout << "Breakfast";
+                break;
+            case MealType::LUNCH:
+                cout << "Lunch";
+                break;
+            case MealType::DINNER:
+                cout << "Dinner";
+                break;
+        }
+        cout << endl;
+    }
+};
+
+int Meal::last_meal_id = 0;
+
+class DiningHall {
+private:
+    static int last_hall_id;
+    int hall_id;
+    string name;
+    string address;
+    int capacity;
+
+public:
+    DiningHall(const string& name, const string& address, int capacity)
+        : name(name), address(address), capacity(capacity) {
+        hall_id = ++last_hall_id;
+    }
+
+    void set_name(const string& n) {
+        name = n;
+    }
+
+    void set_address(const string& a) {
+        address = a;
+    }
+
+    void set_capacity(int c) {
+        capacity = c;
+    }
+
+    int get_hall_id() const {
+        return hall_id;
+    }
+
+    string get_name() const {
+        return name;
+    }
+
+    string get_address() const {
+        return address;
+    }
+
+    int get_capacity() const {
+        return capacity;
+    }
+
+    void print() const {
+        cout << "Hall ID: " << hall_id << "\nName: " << name << "\nAddress: " << address
+             << "\nCapacity: " << capacity << endl;
+    }
+};
+
+int DiningHall::last_hall_id = 0;
 
 class Panel {
     public:
@@ -164,128 +306,6 @@ class Admin : public User {
             return "Admin";
         }
 };
-
-class Meal {
-    private:
-        static int last_meal_id;
-        int meal_id;
-        string name;
-        float price;
-        bool is_active;
-        MealType meal_type;
-        
-        vector<string> side_items;
-    public:
-    Meal(string name,float price, MealType type) :
-     name(name), price(price), meal_type(type), is_active(true) {
-        meal_id = ++last_meal_id;
-     }
-        void set_meal_type(MealType type){
-            meal_type = type;
-        }
-        void set_name(string n){
-            name = n;
-        }
-        void set_price(float p){
-            price = p;
-        }
-        bool get_is_active(){
-            return is_active;
-        }
-        void active(){
-            is_active = true;
-        }
-        void deactive(){
-            is_active = false;
-        }
-        bool is_available() const{
-            return is_active;
-        }
-        void add_price(float new_price){
-            price = new_price;
-        }
-        void add_side_item(const string& item){
-            side_items.push_back(item);
-        }
-
-        int get_meal_id() const{
-            return meal_id;
-        }
-        string get_name() const{
-            return name; }
-
-        MealType get_type() const{
-            return meal_type; }
-
-        float get_price() const{
-            return price;
-        }
-
-        const vector<string>& get_side_item() const {
-            return side_items;
-        }
-        void print() const {
-          cout << "Meal ID: " << meal_id << "\nName: " << name << "\nPrice: " << price << "\nStatus: " << (is_active ? "active": "deactive") << endl;
-          cout << "Meal Type: ";
-          if(meal_type == MealType::BREAKFAST)
-          {
-              cout << "BreakFast";
-          }
-          else if(meal_type == MealType::LUNCH){
-              cout << "Lunch";
-          }
-          else{
-              cout << "Dinner";
-          }
-        
-        }
-    };
-    int Meal::last_meal_id = 0;
-
-
-    class DiningHall {
-        private:
-            static int last_hall_id;
-            int hall_id;
-            string name;
-            string address;
-            int capacity;
-
-        public:
-            DiningHall(string name , string adress , int capacity):
-                name(name) , address(adress) , capacity(capacity){
-                    hall_id = ++last_hall_id;
-                }
-            void set_nema(string n){
-                name = n;
-            }
-            void set_address(string a){
-                address = a;
-            }
-            void set_capacity(int c){
-                capacity = c;
-            }
-
-            int get_hall_id() const{
-                return hall_id;
-            }
-
-            string get_name() const{
-                return name;
-            }
-
-            string get_adderss() const{
-                return address;
-            }
-
-            int get_capacity() const{
-                return capacity;
-            }
-            void print() const{
-                cout << "Hall ID: " << hall_id << "\nName: " << name << "\naddress: " << address << "\ncapacity: " << capacity << endl;
-            }
-        };
-int DiningHall::last_hall_id = 0;
 
 class Student;
 
@@ -468,6 +488,6 @@ int main(){
     while(true){
         panel.show_menu();
         cin >> choice;
-        panel.action(choice); 
+        panel.action(choice);
     }
-}    
+}
