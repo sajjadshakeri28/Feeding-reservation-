@@ -389,6 +389,76 @@ public:
         cout << "Active: " << (is_active ? "Yes" : "No") << endl;
     }
 };
+
+class Admin : public User {
+public:
+    Admin(const string& name, const string& last_name, const string& password)
+        : User(name, last_name, password) {}
+
+    void print() const override {
+        cout << "Admin Account\n";
+        User::print();
+    }
+
+    string get_type() const override {
+        return "Admin";
+    }
+};
+
+class ShoppingCart {
+private:
+    vector<shared_ptr<Reservation>> _reservations;
+
+public:
+    void addReservation(shared_ptr<Reservation> reservation) {
+        _reservations.push_back(reservation);
+        cout << "Added to shopping cart" << endl;
+    }
+
+    void removeReservation(int reservationID) {
+        _reservations.erase(remove_if(_reservations.begin(), _reservations.end(),[reservationID](const shared_ptr<Reservation>& r) { return r->get_reservation_id() == reservationID;}),_reservations.end());
+        }
+
+    void viewShoppingCartItems() const {
+        for (const auto& r : _reservations) {
+            r->print();
+        }
+    }
+
+
+    void clear() {
+        _reservations.clear();
+        cout << "Shopping cart is empty." << endl;
+    }
+
+    vector<shared_ptr<Reservation>> getReservations() const {
+        return _reservations;
+    }
+};
+
+
+class Storage {
+private:
+    static unique_ptr<Storage> _instance;
+
+    Storage() = default;
+    Storage(const Storage&) = delete;
+    Storage& operator=(const Storage&) = delete;
+
+public:
+    vector<shared_ptr<Student>> students;
+    vector<shared_ptr<class Meal>> all_meals;
+    vector<shared_ptr<class DiningHall>> all_dining_halls;
+
+    static Storage& instance() {
+        if (!_instance)
+            _instance = unique_ptr<Storage>(new Storage());
+        return *_instance;
+    }
+};
+
+unique_ptr<Storage> Storage::_instance = nullptr;
+
 class Panel {
     public:
     void show_menu(){
@@ -439,43 +509,7 @@ class Panel {
     //void view_recent_transactions();
     //void cancle_reservation(int);
 };
-class Storage{
-    private:
-        int meal_ID_counter;
-        int diningHall_ID_counter;
-        static unique_ptr<Storage> _instance;
-        Storage() = default;
-        Storage(const Storage&) = delete;
-        Storage& operator=(const Storage&) = delete;
-    public:
-        vector<shared_ptr<Student>> students;
-        vector<shared_ptr<class Meal>> all_meals;
-        vector<shared_ptr<class DiningHall>> all_dining_halls;
 
-        static Storage& instance() {
-            if(!_instance)
-                _instance = unique_ptr<Storage>(new Storage());
-            return *_instance;
-        }
-
-};
-unique_ptr<Storage> Storage::_instance =nullptr;
-
-
-
-class Admin : public User {
-    public:
-        Admin(string name , string last_name , string password)
-            : User(name , last_name , password) {}
-
-        void print() const override {
-            cout << "Admin Account\n";
-            User::print();
-        }
-        string get_type()const override{
-            return "Admin";
-        }
-};
 
 
  void Reservation::print() const {
