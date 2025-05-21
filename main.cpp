@@ -569,54 +569,150 @@ unique_ptr<SessionManager> SessionManager::_instance = nullptr;
 
 }
 class Panel {
-    public:
-    void show_menu(){
-        cout << "--- Student Panel Menu --- \n";
-        cout << "1. Show Student Info\n";
-        cout << "2. check Balance\n";
-        cout << "3. View Reservations\n";
-        cout << "4. Exit\n";
-        "-------------------------------------\n";
-        cout << "Enter your choice: ";
+private:
+    StudentSession::SessionManager& session;
 
-    }
-    void exit(){
-        cout << "Exiting panel..." << endl;
-        std::exit(0);
-    }
+public:
+    Panel() : session(StudentSession::SessionManager::instance()){}
     void action(int choice) {
-        switch(choice){
+        switch (choice) {
             case 1:
-                cout << "//void show_student_info()"<< endl;
+                showStudentInfo();
                 break;
             case 2:
-                cout <<"//void check_balance()" << endl;
+                checkBalance();
                 break;
             case 3:
-                cout <<"//void view_resevations()"<< endl;
+                viewReservations();
                 break;
             case 4:
+                viewShoppingCart();
+                break;
+            case 5:
+                addToShoppingCart();
+                break;
+            case 6:
+                removeShoppingCartItem();
+                break;
+            case 7:
+                void confirmShoppingCart();
+                break;
+            case 8:
+                increaseBalance();
+                break;
+            case 9:
+                void viewRecentTransactions();
+                break;
+            case 10: {
+                int rid;
+                cout << "Enter Reservation ID: ";
+                cin >> rid;
+                break;
+            }
+            case 0:
                 exit();
                 break;
             default:
-                cout << "Invalid choice.Please try again" << endl;
-
+                cout << "Invalid choice. Please try again" << endl;
         }
-
     }
 
+    void show_menu() {
+        int choice;
+        do {
+            cout << "--- Student Panel Menu --- \n";
+            cout << "1. Show Student Info\n";
+            cout << "2. Check Balance\n";
+            cout << "3. View Reservations\n";
+            cout << "4. View Shopping Cart\n";
+            cout << "5. Add To Shopping Cart\n";
+            cout << "6. Remove Shopping Cart Item\n";
+            cout << "7. Confirm Shopping Cart\n";
+            cout << "8. Increase Balance\n";
+            cout << "9. View Recent Transactions\n";
+            cout << "10. Cancel Reservations\n";
+            cout << "0. Exit\n";
+            cout << "-------------------------------------\n";
+            cout << "Enter your choice: ";
+            cin >> choice;
+            action(choice);
+        } while (choice != 0);
+    }
+
+    void showStudentInfo() {
+        if(auto student = session.currentStudent()){
+            student->print();
+        }
+            
+    }
+
+    void checkBalance() {
+        if(auto student = session.currentStudent()){
+            cout << "Balance: " << session.currentStudent()->get_balance() << " toman\n";
+        }
+        
+    }
+
+    void viewReservations() {
+        for (const auto& r : session.currentStudent()->get_reservations())
+            r->print();
+    }
+
+    void viewShoppingCart() {
+        session.shoppingCart()->viewShoppingCartItems();
+    }
+
+    void addToShoppingCart() {
+    int meal_id;
+    cout << "Enter Meal ID: ";
+    cin >> meal_id;
+
+    shared_ptr<Meal> selected = nullptr;
+    for (auto& m : Storage::instance().all_meals) {
+        if (m->get_meal_id() == meal_id) {
+            selected = m;
+            break;
+        }
+    }
+    if (!selected) {
+        cout << "Did not find food" << endl;
+        return;
+    }
+
+    auto& halls = Storage::instance().all_dining_halls;
+    if (halls.empty()) {
+        cout << "No dining hall found." << endl;
+        return;
+    }
+
+    auto dininghallPtr = halls[0];
+    auto studentPtr = shared_ptr<Student>(session.currentStudent());
+    
+    auto reservation = make_shared<Reservation>(studentPtr , selected , dininghallPtr);
+    reservation->set_status(RStatus::NOT_PAID);
+    session.shoppingCart()->addReservation(reservation);
+}
 
 
-    //void show_student_info();
-    //void check_balance();
-    //void view_resevations();
-    //void add_reservation(Reservaion);
-    //void add_to_shop_cart();
-    //void confirm_shoppig_cart();
-    //vlid remove_shoppig_cart();
-    //void increace_balance();
-    //void view_recent_transactions();
-    //void cancle_reservation(int);
+    void removeShoppingCartItem() {
+        int rid;
+        cout << "Enter ID: ";
+        cin >> rid;
+        session.shoppingCart()->removeReservation(rid);
+    }
+
+    void increaseBalance() {
+        float amount;
+        cout << "Deposit amount: ";
+        cin >> amount;
+        session.currentStudent()->set_balance(session.currentStudent()->get_balance() + amount);
+        cout << "Deposit increased." << endl;
+    }
+
+    void exit() {
+        cout << "Exiting panel..." << endl;
+        std::exit(0);
+    }
 };
 
 class Transaction {
