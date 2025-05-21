@@ -534,6 +534,40 @@ unique_ptr<SessionManager> SessionManager::_instance = nullptr;
 
 }
 
+namespace AdminSession {
+
+class SessionManager : public SessionBase {
+private:
+    static unique_ptr<SessionManager> _instance;
+
+    Admin* _currentAdmin = nullptr;
+
+    SessionManager() = default;
+
+public:
+    static SessionManager& instance() {
+        if (!_instance)
+            _instance = unique_ptr<SessionManager>(new SessionManager());
+        return *_instance;
+    }
+
+    void load_session() override {}
+    void save_session() override {}
+    void login(const string& username, const string& password) override {}
+    void logout() override {}
+
+    Admin* currentAdmin() const {
+        return _currentAdmin;
+    }
+
+    void setCurrentAdmin(Admin* a) {
+        _currentAdmin = a;
+    }
+};
+
+unique_ptr<SessionManager> SessionManager::_instance = nullptr;
+
+}
 class Panel {
     public:
     void show_menu(){
@@ -585,33 +619,120 @@ class Panel {
     //void cancle_reservation(int);
 };
 
+class Transaction {
+private:
+    static int last_transaction_id;
+
+    int _transactionID;
+    string _trackingCode;
+    float _amount;
+    TransactionType _type;
+    TransactionStatus _status;
+    time_t _createdAt;
+
+public:
+    Transaction(float amount = 0.0, TransactionType type = TransactionType::PAYMENT,
+                TransactionStatus status = TransactionStatus::PENDING,
+                string tracking = "")
+        : _amount(amount), _type(type), _status(status), _trackingCode(tracking) {
+        _transactionID = ++last_transaction_id;
+        _createdAt = time(nullptr);
+    }
+
+    int get_transaction_id() const {
+        return _transactionID;
+    }
+
+    string get_tracking_code() const {
+        return _trackingCode;
+    }
+
+    float get_amount() const {
+        return _amount;
+    }
+
+    TransactionType get_type() const {
+        return _type;
+    }
+
+    TransactionStatus get_status() const {
+        return _status;
+    }
+
+    time_t get_created_at() const {
+        return _createdAt;
+    }
+
+    void set_tracking_code(const string& code) {
+        _trackingCode = code;
+    }
+
+    void set_amount(float amt) {
+        _amount = amt;
+    }
+
+    void set_type(TransactionType type) {
+        _type = type;
+    }
+
+    void set_status(TransactionStatus status) {
+        _status = status;
+    }
+
+    void print() const {
+        cout << "Transaction ID: " << _transactionID << "\nAmount: " << _amount
+             << "\nTracking Code: " << _trackingCode << "\nStatus: " << static_cast<int>(_status)
+             << "\nCreated At: " << ctime(&_createdAt);
+    }
+};
 
 
- void Reservation::print() const {
-        cout << "Reservation ID: " << reservation_id << "\nStudent: " << student->get_name()
-        << "\nMeal: " << meal->get_name() << "Dining Hall: " << dining_hall->get_name() << endl;
-        cout << "status:";
-        switch (status){
-        case RStatus::FAILED:
-            cout << "pending";
+
+void Reservation::print() const {
+    cout << "Reservation ID: " << reservation_id << "\nStudent: " << student->get_name()
+         << "\nMeal: " << meal->get_name() << "\nDining Hall: " << dining_hall->get_name() << endl;
+    cout << "Status: ";
+    switch (status) {
+        case RStatus::NOT_PAID:
+            cout << "Pending";
             break;
         case RStatus::CANCELLED:
-            cout << "cancelled";
+            cout << "Cancelled";
             break;
-            case RStatus::SUCCESS:
-            cout << "confirmed";
+        case RStatus::SUCCESS:
+            cout << "Confirmed";
             break;
     }
     cout << endl;
-    }
+}
 
-int main(){
+
+   int main() {
+    // Initialize sample data
+    auto& storage = Storage::instance();
+
+    // Create sample dining halls
+    storage.all_dining_halls.push_back(make_shared<DiningHall>("Main Dining Hall", "Central Campus", 200));
+    storage.all_dining_halls.push_back(make_shared<DiningHall>("North Dining Hall", "North Campus", 150));
+
+
+    storage.all_meals.push_back(make_shared<Meal>("Breakfast Combo", 15.0, MealType::BREAKFAST));
+    storage.all_meals.push_back(make_shared<Meal>("Lunch Special", 20.0, MealType::LUNCH));
+    storage.all_meals.push_back(make_shared<Meal>("Dinner Package", 25.0, MealType::DINNER));
+
+
+    auto student = make_shared<Student>("Ali", "Mohammadi", "password123",  "9821001", "ali@university.com", "09123456789");
+    student->set_balance(100.0);
+    storage.students.push_back(student);
+
+    auto& session = StudentSession::SessionManager::instance();
+    session.set_current_student(student);
+    session.set_shopping_cart(make_shared<ShoppingCart>());
+    session.set_status(SessionStatus::AUTHENTICATED);
+
+    // Start the panel
     Panel panel;
-    int choice;
+    panel.show_menu();
 
-    while(true){
-        panel.show_menu();
-        cin >> choice;
-        panel.action(choice);
-    }
+    return 0;
 }
