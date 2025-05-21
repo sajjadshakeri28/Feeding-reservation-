@@ -219,6 +219,176 @@ public:
 
 int DiningHall::last_hall_id = 0;
 
+class Student;
+
+class Reservation {
+private:
+    static int last_reservation_id;
+    int reservation_id;
+    shared_ptr<Student> student;
+    shared_ptr<const DiningHall> dining_hall;
+    shared_ptr<Meal> meal;
+    RStatus status;
+    time_t created_at;
+
+public:
+    Reservation(shared_ptr<Student> s,shared_ptr<Meal> m, shared_ptr<const DiningHall> h)
+        : student(s), meal(m),dining_hall(h), status(RStatus::NOT_PAID) {
+        reservation_id = ++last_reservation_id;
+        created_at = time(nullptr);
+    }
+
+    void set_status(RStatus new_status) {
+        status = new_status;
+    }
+
+    void set_meal(shared_ptr<Meal> m) {
+        meal = m;
+    }
+
+    void set_dining_hall(shared_ptr<const DiningHall> h) {
+        dining_hall = h;
+    }
+
+    void set_created_at(time_t t) {
+        created_at = t;
+    }
+
+    int get_reservation_id() const {
+        return reservation_id;
+    }
+
+    RStatus get_status() const {
+        return status;
+    }
+
+    shared_ptr<Meal> get_meal() const {
+        return meal;
+    }
+
+    shared_ptr<const DiningHall> get_dining_hall() const {
+        return dining_hall;
+    }
+
+    shared_ptr<Student> get_student() const {
+        return student;
+    }
+
+    void print() const;
+};
+
+int Reservation::last_reservation_id = 0;
+
+class Student : public User {
+private:
+    string student_id;
+    string phone;
+    string email;
+    float balance;
+    bool is_active;
+    vector<shared_ptr<Reservation>> reservations;
+
+public:
+    Student(const string& name, const string& last_name, const string& password,
+            const string& student_id, const string& email, const string& phone)
+        : User(name, last_name, password), student_id(student_id), email(email),
+          phone(phone), balance(0.0), is_active(true) {}
+
+    void set_student_id(const string& sid) {
+        student_id = sid;
+    }
+
+    void set_name(const string& n) {
+        name = n;
+    }
+
+    void set_email(const string& e) {
+        email = e;
+    }
+
+    void set_phone(const string& ph) {
+        phone = ph;
+    }
+
+    void set_balance(float b) {
+        balance = b;
+    }
+
+    void set_is_active(bool active) {
+        is_active = active;
+    }
+
+    // Getters
+    string get_student_id() const {
+        return student_id;
+    }
+
+    string get_email() const {
+        return email;
+    }
+
+    string get_phone() const {
+        return phone;
+    }
+
+    float get_balance() const {
+        return balance;
+    }
+
+    void activate() {
+        is_active = true;
+    }
+
+    void deactivate() {
+        is_active = false;
+    }
+
+    vector<shared_ptr<Reservation>> get_reservations() {
+        return reservations;
+    }
+
+    void reserve_meal(shared_ptr<Meal> meal, shared_ptr<DiningHall> hall) {
+        if (!is_active) {
+            cout << "Account inactive. Cannot reserve meal." << endl;
+            return;
+        }
+
+        if (balance < meal->get_price()) {
+            cout << "Insufficient balance!" << endl;
+            return;
+        }
+
+        if (!meal->is_available()) {
+            cout << "Meal is not available!" << endl;
+            return;
+        }
+
+        balance -= meal->get_price();
+        reservations.push_back(make_shared<Reservation>(shared_ptr<Student>(this), meal , hall));
+        cout << "Meal reserved successfully!" << endl;
+    }
+
+       bool cancel_reservation(int reservation_id) {
+        for (auto& res : reservations) {
+            if (res->get_reservation_id() == reservation_id && res->get_status() == RStatus::SUCCESS) {
+                res->set_status(RStatus::CANCELLED);
+                balance += res->get_meal()->get_price();
+                cout << "Reservation cancelled successfully." << endl;
+                return true;
+            }
+        }
+        cout << "No active reservation found for this ID." << endl;
+        return false;
+    }
+
+    void print() const override {
+        cout << "Student ID: " << student_id << endl;
+        cout << "Email: " << email << endl;
+        cout << "Phone: " << phone << endl;
+        cout << "Balance: " << balance << endl;
+        cout << "Active: " << (is_active ? "Yes" : "No") << endl;
+    }
+};
 class Panel {
     public:
     void show_menu(){
@@ -307,162 +477,7 @@ class Admin : public User {
         }
 };
 
-class Student;
 
-class Reservation {
-    private:
-        static int last_reservation_id;
-        int reservation_id;
-        Student* student;
-        const DiningHall *dining_hall;
-        Meal* meal;
-        RStatus status;
-        time_t created_at;
-
-    public:
-        Reservation(Student* s, Meal* m,const DiningHall* d)
-        : student(s), meal(m), dining_hall(d), status(RStatus::NOT_PAID){
-            reservation_id = ++last_reservation_id;
-            created_at =  time(nullptr);
-        }
-
-
-        void set_status(RStatus new_status){
-        status = new_status;
-        }
-        void set_meal(Meal* m){
-            meal = m;
-        }
-        void set_dining_hall(const DiningHall* h){
-            dining_hall = h;
-        }
-        void set_created_at(time_t t){
-            created_at = t;
-        }
-
-        int get_reservation_id() const{
-            return reservation_id;
-        }
-
-        RStatus get_status() const{
-        return status; }
-
-        Meal* get_meal() const{
-            return meal;
-        }
-        const DiningHall* get_dininghall()const{
-            return dining_hall;
-        }
-        Student* get_student()const{
-            return student;
-        }
-        void print()const;
-    };
-
-
-int Reservation::last_reservation_id = 0;
-    class Student : public User{
-        private:
-            string student_id;
-            string phone;
-            string email;
-            float balance;
-            bool is_active;
-            vector<Reservation> reservations;
-        public:
-            Student(string name , string last_name , string password , string student_id , string email , string phone)
-            : User(name , last_name , password) , student_id(student_id) , email(email), phone(phone), balance(0.0), is_active(true) {}
-
-            void set_student_id(const string& sid){
-                student_id = sid;
-            }
-            void set_name(const string& n){
-                name = n;
-            }
-            void set_email(const string& e){
-                email = e;
-            }
-            void set_phone(const string& ph){
-                phone = ph;
-            }
-            void set_balance(float b){
-                balance = b;
-            }
-            void set_is_active(bool active){
-                is_active = active;
-            }
-            //Getters
-
-            string get_student_id()const{
-                return student_id;
-            }
-            string get_email()const{
-                return email;
-            }
-            string get_phone()const{
-                return phone;
-            }
-            float get_balance()const{
-                return balance;
-            }
-            void active(){
-                is_active = true;
-            }
-            void deactive(){
-                is_active = false;
-            }
-            vector <Reservation>&get_reservations(){
-                return reservations;
-            }
-
-            void reserve_meal(Meal& meal, const DiningHall& hall) {
-                if (!is_active) {
-                    cout << "Account inactive. Cannot reserve meal." << endl;
-                    return;
-                }
-
-                if (balance < meal.get_price()) {
-                    cout << "Insufficient balance!" << endl;
-                    return;
-                }
-            if (!meal.is_available()) {
-                    cout << "Meal is not available!" << endl;
-                    return;
-                }
-            // for(const auto& res : reservations){
-            //     if(res.get_meal()->get_type() == meal.get_type() && res.get_meal()->getReservday() == meal.getReservday() && res.get_status() == ReservationStatus::CONFIRMED){
-            //         cout << "Already reserved for this meal type and date." << endl;
-            //         return;
-            //     }
-            // }
-
-
-                balance -= meal.get_price();
-                reservations.emplace_back(this, &meal, &hall);
-                cout << "Meal reserved successfully!" << endl;
-            }
-
-            // bool cancel_reservation(int reservation_id) {
-            //     for (auto& res : reservations) {
-            //         if (res.get_reservation_id() == reservation_id && res.get_status() == ReservationStatus::CONFIRMED) {
-            //             res.set_status(ReservationStatus::CANCELLED);
-            //             balance += res.get_meal()->get_price();
-            //             return true;
-            //         }
-            //     }
-            //     cout << "NO active reservtion found for this id." << endl;
-            //     return false;
-            // }
-            void print()const override{
-                cout << "Student ID: " << student_id << endl;
-                cout << "Email: " << email << endl;
-                cout << "Phone: " << phone << endl;
-                cout << "Balance: " << balance << endl;
-                cout << "Active: " << (is_active ? "Yes" : "No")<< endl;
-            }
-
-
-    };
  void Reservation::print() const {
         cout << "Reservation ID: " << reservation_id << "\nStudent: " << student->get_name()
         << "\nMeal: " << meal->get_name() << "Dining Hall: " << dining_hall->get_name() << endl;
