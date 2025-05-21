@@ -459,6 +459,81 @@ public:
 
 unique_ptr<Storage> Storage::_instance = nullptr;
 
+class SessionBase {
+protected:
+    time_t _createdAt;
+    time_t _lastLoginTime;
+    SessionStatus _status;
+
+public:
+    SessionBase() : _createdAt(time(nullptr)), _lastLoginTime(time(nullptr)), _status(SessionStatus::ANONYMOUS) {}
+
+    virtual void load_session() = 0;
+    virtual void save_session() = 0;
+    virtual void login(const string& username, const string& password) = 0;
+    virtual void logout() = 0;
+
+    time_t get_created_at() const {
+        return _createdAt;
+    }
+
+    time_t get_last_login_time() const {
+        return _lastLoginTime;
+    }
+
+    SessionStatus get_status() const {
+        return _status;
+    }
+
+    void set_status(SessionStatus status) {
+        _status = status;
+    }
+};
+
+namespace StudentSession {
+
+class SessionManager : public SessionBase {
+private:
+    static unique_ptr<SessionManager> _instance;
+
+    shared_ptr<Student> _currentStudent = nullptr;
+    shared_ptr<ShoppingCart> _shopping_cart = nullptr;
+
+    SessionManager() = default;
+
+public:
+    static SessionManager& instance() {
+        if (!_instance)
+            _instance = unique_ptr<SessionManager>(new SessionManager());
+        return *_instance;
+    }
+
+    void load_session() override {}
+    void save_session() override {}
+    void login(const string& username, const string& password) override {}
+    void logout() override {}
+
+    shared_ptr<Student> currentStudent() const {
+        return _currentStudent;
+    }
+
+    shared_ptr<ShoppingCart> shoppingCart() const {
+        return _shopping_cart;
+    }
+
+    void set_current_student(shared_ptr<Student> s) {
+        _currentStudent = s;
+    }
+
+    void set_shopping_cart(shared_ptr<ShoppingCart> cart) {
+        _shopping_cart = cart;
+    }
+};
+
+unique_ptr<SessionManager> SessionManager::_instance = nullptr;
+
+}
+
 class Panel {
     public:
     void show_menu(){
